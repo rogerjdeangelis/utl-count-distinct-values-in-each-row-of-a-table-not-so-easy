@@ -16,9 +16,11 @@ inspired by
 https://tinyurl.com/y9xmnhh5
 https://communities.sas.com/t5/SAS-Programming/counting-distinct-values-over-a-range-of-variables/td-p/327817/page/2
 
-   Three Solutions
-         a. hash
-         b. datastep
+   Four Solutions
+         a. datastep
+         b. Bart's HASH (preferred solution - very elegant)
+            Bartosz Jablonski
+            yabwon@gmail.com
          c. faster datastep
          d. R (should be just as elegant in IML)
 
@@ -70,49 +72,17 @@ WORK.WANT total obs=5
    D        3
    E        3
 
-*          _               _
-  __ _    | |__   __ _ ___| |__
- / _` |   | '_ \ / _` / __| '_ \
-| (_| |_  | | | | (_| \__ \ | | |
- \__,_(_) |_| |_|\__,_|___/_| |_|
-
-;
-
-* I am a novice HASH programmer;
-
-data want;
-
-    if _n_=0 then set sd1.have;
-
-    declare hash h ();
-    h.definekey ('id','m');
-    h.definedata ('id', 'v1', 'v2', 'v3', 'v4', 'v5');
-    h.definedone();
-
-    do until (lr);
-        retain cnt_unique 0;
-        set sd1.have end=lr;
-        array vs _numeric_;
-        do i = 1 to 5;
-           m = vs[i];
-           if h.check() ne 0 then cnt_unique=cnt_unique+1;
-           h.ref();
-        end;
-        output;
-        cnt_unique=0;
-    end;
-
-    keep id cnt_unique;
-
-run;
-
-
-*_            _       _            _
-| |__      __| | __ _| |_ __ _ ___| |_ ___ _ __
-| '_ \    / _` |/ _` | __/ _` / __| __/ _ \ '_ \
-| |_) |  | (_| | (_| | || (_| \__ \ ||  __/ |_) |
-|_.__(_)  \__,_|\__,_|\__\__,_|___/\__\___| .__/
-                                          |_|
+*          _       _   _
+ ___  ___ | |_   _| |_(_) ___  _ __  ___
+/ __|/ _ \| | | | | __| |/ _ \| '_ \/ __|
+\__ \ (_) | | |_| | |_| | (_) | | | \__ \
+|___/\___/|_|\__,_|\__|_|\___/|_| |_|___/
+               _       _            _
+  __ _      __| | __ _| |_ __ _ ___| |_ ___ _ __
+ / _` |    / _` |/ _` | __/ _` / __| __/ _ \ '_ \
+| (_| |_  | (_| | (_| | || (_| \__ \ ||  __/ |_) |
+ \__,_(_)  \__,_|\__,_|\__\__,_|___/\__\___| .__/
+                                           |_|
 ;
 
 data want;
@@ -127,6 +97,50 @@ data want;
   count_unique=0;
   keep id ciunt_unique;
 run;quit;
+
+*_        ____             _         _               _
+| |__    | __ )  __ _ _ __| |_ ___  | |__   __ _ ___| |__
+| '_ \   |  _ \ / _` | '__| __/ __| | '_ \ / _` / __| '_ \
+| |_) |  | |_) | (_| | |  | |_\__ \ | | | | (_| \__ \ | | |
+|_.__(_) |____/ \__,_|_|   \__|___/ |_| |_|\__,_|___/_| |_|
+
+;
+
+data have;
+ input id$ v1-v5;
+cards4;
+A 3 3 2 3 3
+B 3 3 2 3 3
+C 1 3 2 3 3
+D 1 3 2 3 3
+E 1 3 2 3 3
+;;;;
+run;
+
+data want;
+
+    declare hash h ();
+    h.defineKey ('_');
+    h.defineDone();
+    call missing(_);
+
+    do until (lr);
+        set have end=lr;
+        array vs v:;
+        do over vs;
+           _N_ = h.add(key: vs, data: vs); /* if you remove `, data: vs` you will get
+                                              an error which proves that even if you are
+                                              declaring "only a key-hash" the data portion
+                                              (equal to the key) is also defined :-) */
+        end;
+        cnt_unique = h.num_items;
+        output;
+        _N_ = h.clear();
+    end;
+
+    keep id cnt_unique;
+    stop;
+run;
 
 *          __           _         _       _            _
   ___     / _| __ _ ___| |_    __| | __ _| |_ __ _ ___| |_ ___ _ __
@@ -150,7 +164,6 @@ data want;
   cnt_unique=0;
   keep id cnt_unique;
 run;quit;
-
 
 
 data _null_;
@@ -185,5 +198,6 @@ data want;
   set xpt.want;
 run;quit;
 libname xpt clear;
+
 
 
