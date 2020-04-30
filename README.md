@@ -25,7 +25,9 @@ Count distinct values in each row of a table
                 yabwon@gmail.com
              c. faster datastep
              d. R (should be just as elegant in IML)
-
+             e. SAS without sort
+                Yinglin (Max) Wu
+                yinglinwu@gmail.com
     *_                   _
     (_)_ __  _ __  _   _| |_
     | | '_ \| '_ \| | | | __|
