@@ -174,6 +174,13 @@ Count distinct values in each row of a table
         "if ?vcur ne ?vpre then cnt_unique = cnt_unique + 1" /)
       );
     run;quit;
+    
+    Generated Code
+    
+    if v2 ne v1 then cnt_unique = cnt_unique + 1
+    if v3 ne v2 then cnt_unique = cnt_unique + 1
+    if v4 ne v3 then cnt_unique = cnt_unique + 1
+    if v5 ne v4 then cnt_unique = cnt_unique + 1
 
     *    _
       __| |    _ __
