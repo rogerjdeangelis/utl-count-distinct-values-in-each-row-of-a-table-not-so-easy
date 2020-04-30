@@ -23,6 +23,10 @@ https://communities.sas.com/t5/SAS-Programming/counting-distinct-values-over-a-r
             yabwon@gmail.com
          c. faster datastep
          d. R (should be just as elegant in IML)
+         e. SAS without sort
+            Yinglin (Max) Wu
+            yinglinwu@gmail.com
+
 
 *_                   _
 (_)_ __  _ __  _   _| |_
@@ -173,6 +177,13 @@ data _null_;
   );
 run;quit;
 
+Generated Code
+if v2 ne v1 then cnt_unique = cnt_unique + 1
+if v3 ne v2 then cnt_unique = cnt_unique + 1
+if v4 ne v3 then cnt_unique = cnt_unique + 1
+if v5 ne v4 then cnt_unique = cnt_unique + 1
+
+
 *    _
   __| |    _ __
  / _` |   | '__|
@@ -198,6 +209,42 @@ data want;
   set xpt.want;
 run;quit;
 libname xpt clear;
+
+*                                                      _
+  ___     ___  __ _ ___   _ __   ___    ___  ___  _ __| |_
+ / _ \   / __|/ _` / __| | '_ \ / _ \  / __|/ _ \| '__| __|
+|  __/_  \__ \ (_| \__ \ | | | | (_) | \__ \ (_) | |  | |_
+ \___(_) |___/\__,_|___/ |_| |_|\___/  |___/\___/|_|   \__|
+
+;
+
+
+data have;
+ input id$ v1-v5;
+cards;
+A 3 3 2 3 3
+B 3 9 2 3 3
+C 1 3 2 3 3
+D 1 3 2 4 3
+E 1 1 2 3 3
+;
+
+data want;
+set have;
+array v{5};
+count_unique=5;
+do i=1 to dim(v);
+do j=i+1 to dim(v);
+if v[i]=v[j] then do;
+count_unique=count_unique-1;
+leave;
+end;
+end;
+end;
+keep id count_unique;
+run;
+
+
 
 
 
